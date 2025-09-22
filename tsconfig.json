@@ -1,6 +1,12 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@mini-vue/*": ["packages/*/src"]
+		},
 		"alwaysStrict": false,
+		"allowSyntheticDefaultImports": true,
+		"noImplicitAny": false,
 		"declaration": true,
 		"declarationMap": true,
 		"downlevelIteration": true,
@@ -19,6 +25,8 @@
 		"strict": true,
 		"strictBindCallApply": false,
 		"target": "es2018",
-		"noUncheckedIndexedAccess": true
-	}
+		"noUncheckedIndexedAccess": true,
+		"types": ["vitest/globals"]
+	},
+	"include": ["packages/*/src", "packages/*/__tests__"]
 }
