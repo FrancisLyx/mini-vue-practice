@@ -21,15 +21,19 @@ function cleanupEffect(effect: ReactiveEffect) {
 export class ReactiveEffect {
 	active = true
 	deps: Set<ReactiveEffect>[] = []
-	constructor(public fn) {}
+	constructor(
+		public fn,
+		public scheduler
+	) {}
 	run() {
 		activeEffect = this
 		return this.fn()
 	}
 }
 
-export function effect(fn) {
-	const _effect = new ReactiveEffect(fn)
+export function effect(fn, options: any = {}) {
+	const scheduler = options.scheduler
+	const _effect = new ReactiveEffect(fn, scheduler)
 	_effect.run()
 	return _effect.run.bind(_effect)
 }
@@ -52,6 +56,12 @@ export function trigger(target, key) {
 	if (!depsMap) return
 	const deps = depsMap.get(key)
 	if (deps) {
-		deps.forEach((dep) => dep.run())
+		deps.forEach((dep) => {
+			if (dep.scheduler) {
+				dep.scheduler()
+			} else {
+				dep.run()
+			}
+		})
 	}
 }
