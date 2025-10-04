@@ -1,8 +1,8 @@
 import { reactive } from '../src/reactive'
-import { effect } from '../src/effect'
+import { effect, stop } from '../src/effect'
 describe('effect', () => {
 	// effect使用
-	it('happy path', () => {
+	it('effect usage', () => {
 		const user = reactive({
 			age: 10
 		})
@@ -14,7 +14,7 @@ describe('effect', () => {
 		user.age++
 		expect(nextAge).toBe(12)
 	})
-	it('should return runner when call effect', () => {
+	it('effect runner', () => {
 		// effect runner effect(fn) => function(runner) => fn() => return
 		let foo = 10
 		const runner = effect(() => {
@@ -46,5 +46,34 @@ describe('effect', () => {
 		expect(dummy).toBe(1)
 		run()
 		expect(dummy).toBe(2)
+	})
+	it('stop', () => {
+		let dummy
+		const obj = reactive({ prop: 1 })
+		const runner = effect(() => {
+			dummy = obj.prop
+		})
+		obj.prop = 2
+		expect(dummy).toBe(2)
+		// 停止更新，相当于把依赖都删除掉了
+		stop(runner)
+		obj.prop = 3
+		expect(dummy).toBe(2)
+
+		// stoped effect should still be manually callable
+		runner()
+		expect(dummy).toBe(3)
+	})
+	it('onStop', () => {
+		const obj = reactive({ foo: 1 })
+		const onStop = vi.fn()
+		const runner = effect(
+			() => {
+				obj.foo
+			},
+			{ onStop }
+		)
+		stop(runner)
+		expect(onStop).toHaveBeenCalledTimes(1)
 	})
 })
