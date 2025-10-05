@@ -57,7 +57,8 @@ describe('effect', () => {
 		expect(dummy).toBe(2)
 		// 停止更新，相当于把依赖都删除掉了
 		stop(runner)
-		obj.prop = 3
+		// obj.prop = 3
+		obj.prop++
 		expect(dummy).toBe(2)
 
 		// stoped effect should still be manually callable
