@@ -2,6 +2,8 @@ import { track, trigger } from './effect'
 import { ReactiveFlag } from './reactive'
 
 const get = createGetter()
+const set = createSetter()
+const readonlyGet = createGetter(true)
 
 function createGetter(isReadonly = false) {
 	return function get(target, key, receiver) {
@@ -18,9 +20,17 @@ function createGetter(isReadonly = false) {
 	}
 }
 
+function createSetter() {
+	return function set(target, key, value, receiver) {
+		const result = Reflect.set(target, key, value, receiver)
+		trigger(target, key)
+		return result
+	}
+}
+
 export const readonlyHandler = {
-	get,
-	set(target, key, value, receiver) {
+	get: readonlyGet,
+	set(target, key) {
 		console.warn(`Set operation on key "${key}" failed: target is readonly.`)
 		return true
 	}
@@ -28,9 +38,5 @@ export const readonlyHandler = {
 
 export const baseHandler = {
 	get,
-	set(target, key, value, receiver) {
-		const result = Reflect.set(target, key, value, receiver)
-		trigger(target, key)
-		return result
-	}
+	set
 }

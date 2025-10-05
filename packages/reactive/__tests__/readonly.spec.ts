@@ -1,4 +1,4 @@
-import { readonly } from '../src/reactive'
+import { readonly, isReadonly } from '../src/reactive'
 
 // readonly 就是对象无法进行set操作，无法进行修改
 
@@ -8,6 +8,8 @@ describe('readonly', () => {
 		const observed = readonly(original)
 		expect(observed).not.toBe(original)
 		expect(observed.foo).toBe(1)
+		expect(isReadonly(original)).toBe(false)
+		expect(isReadonly(observed)).toBe(true)
 	})
 	it('warn when set', () => {
 		console.warn = vi.fn()
