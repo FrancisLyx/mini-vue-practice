@@ -4,9 +4,9 @@ let activeEffect: ReactiveEffect | null = null
 
 /**
  *  对象依赖表  targetMap -> depsMap -> deps
- * targetMap target -> effect
- *  - depsMap key -> effect
- *    - deps key -> effect
+ * targetMap weakMap target -> effect
+ *  - depsMap map target -> effect
+ *    - deps  副作用集合set effect
  */
 const targetMap = new WeakMap()
 
@@ -34,6 +34,7 @@ export class ReactiveEffect {
 	}
 	stop() {
 		if (this.active) {
+			// 清空依赖
 			cleanupEffect(this)
 			this.onStop && this.onStop()
 			this.active = false
@@ -61,11 +62,13 @@ export function track(target, key) {
 		depsMap.set(key, (deps = new Set()))
 	}
 	if (!activeEffect) return
+	// 让响应式属性知道，我具体依赖了哪些effect
 	deps.add(activeEffect)
-	// 存储deps 方便后续清空依赖
+	// 让当前的副作用知道，我依赖了哪些响应式属性
 	activeEffect.deps.push(deps)
 }
 
+// 执行targetMap => depsMap => deps 全部执行
 export function trigger(target, key) {
 	const depsMap = targetMap.get(target)
 	if (!depsMap) return

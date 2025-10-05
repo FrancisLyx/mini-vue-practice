@@ -1,28 +1,22 @@
-import { track, trigger } from './effect'
+import { baseHandler, readonlyHandler } from './baseHandler'
 
 const reactiveMap = new WeakMap()
 
-export const baseHandler = {
-	get(target, key, receiver) {
-		if (key === ReactiveFlag.IS_REACTIVE) {
-			return true
-		}
-		track(target, key)
-		return Reflect.get(target, key, receiver)
-	},
-	set(target, key, value, receiver) {
-		const result = Reflect.set(target, key, value, receiver)
-		trigger(target, key)
-		return result
-	}
-}
-
-const enum ReactiveFlag {
-	IS_REACTIVE = '__v_isReactive'
+export const enum ReactiveFlag {
+	IS_REACTIVE = '__v_isReactive',
+	IS_READONLY = '__v_isReadonly'
 }
 
 export function isReactive(target) {
 	return !!target[ReactiveFlag.IS_REACTIVE]
+}
+
+export function isReadonly(target) {
+	return !!target[ReactiveFlag.IS_READONLY]
+}
+
+export function readonly(target) {
+	return createReactiveObject(target, reactiveMap, true)
 }
 
 export function reactive(target) {
@@ -34,7 +28,7 @@ function createReactiveObject(target, proxyMap: WeakMap<object, object>, isReado
 	let exsistingReactiveObject = proxyMap.get(target)
 	if (exsistingReactiveObject) return exsistingReactiveObject
 
-	const proxy = new Proxy(target, baseHandler)
+	const proxy = new Proxy(target, isReadonly ? readonlyHandler : baseHandler)
 	proxyMap.set(target, proxy)
 	return proxy
 }
