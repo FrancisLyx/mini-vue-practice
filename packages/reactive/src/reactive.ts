@@ -1,4 +1,4 @@
-import { baseHandler, readonlyHandler } from './baseHandler'
+import { baseHandler, readonlyHandler, shallowReadonlyHandler } from './baseHandler'
 
 const reactiveMap = new WeakMap()
 
@@ -23,12 +23,24 @@ export function reactive(target) {
 	return createReactiveObject(target, reactiveMap, false)
 }
 
-function createReactiveObject(target, proxyMap: WeakMap<object, object>, isReadonly = false) {
+export function shallowReadonly(target) {
+	return createReactiveObject(target, reactiveMap, false, true)
+}
+
+function createReactiveObject(
+	target,
+	proxyMap: WeakMap<object, object>,
+	isReadonly = false,
+	shallow = false
+) {
 	// 存在缓存
 	let exsistingReactiveObject = proxyMap.get(target)
 	if (exsistingReactiveObject) return exsistingReactiveObject
 
-	const proxy = new Proxy(target, isReadonly ? readonlyHandler : baseHandler)
+	const proxy = new Proxy(
+		target,
+		isReadonly ? readonlyHandler : shallow ? shallowReadonlyHandler : baseHandler
+	)
 	proxyMap.set(target, proxy)
 	return proxy
 }
