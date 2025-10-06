@@ -2,7 +2,7 @@ import { reactive, isReactive } from '../src/reactive'
 
 describe('reactive', () => {
 	test('Object', () => {
-		const original = { foo: 1 }
+		const original = { foo: 1, bar: { a: 1 } }
 		const observed = reactive(original)
 		const sameObserved = reactive(original)
 		// 响应式对象不等于原对象
@@ -16,9 +16,12 @@ describe('reactive', () => {
 		// 	// has 测试响应式对象是否含有某属性
 		expect('foo' in observed).toBe(true)
 		// 	// ownKeys 测试响应式对象是否含有某个键
-		expect(Object.keys(observed)).toEqual(['foo'])
+		expect(Object.keys(observed)).toEqual(['foo', 'bar'])
 		// 	// 重复对象, 两个对象完全一致，那么我们返回缓存就可以了
 		expect(sameObserved).toBe(observed)
+
+		expect(isReactive(observed.bar)).toBe(true)
+		expect(isReactive(original.bar)).toBe(false)
 	})
 
 	// test('nested reactives', () => {

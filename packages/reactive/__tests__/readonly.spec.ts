@@ -4,12 +4,14 @@ import { readonly, isReadonly } from '../src/reactive'
 
 describe('readonly', () => {
 	it('happy path', () => {
-		const original = { foo: 1 }
+		const original = { foo: 1, bar: { a: 1 } }
 		const observed = readonly(original)
 		expect(observed).not.toBe(original)
-		expect(observed.foo).toBe(1)
 		expect(isReadonly(original)).toBe(false)
 		expect(isReadonly(observed)).toBe(true)
+		expect(isReadonly(observed.bar)).toBe(true)
+		expect(isReadonly(original.bar)).toBe(false)
+		expect(observed.foo).toBe(1)
 	})
 	it('warn when set', () => {
 		console.warn = vi.fn()
