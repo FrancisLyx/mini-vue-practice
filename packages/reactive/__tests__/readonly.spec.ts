@@ -1,4 +1,4 @@
-import { readonly, isReadonly } from '../src/reactive'
+import { readonly, isReadonly, isProxy } from '../src/reactive'
 
 // readonly 就是对象无法进行set操作，无法进行修改
 
@@ -11,6 +11,8 @@ describe('readonly', () => {
 		expect(isReadonly(observed)).toBe(true)
 		expect(isReadonly(observed.bar)).toBe(true)
 		expect(isReadonly(original.bar)).toBe(false)
+		expect(isProxy(observed)).toBe(true)
+		expect(isProxy(original)).toBe(false)
 		expect(observed.foo).toBe(1)
 	})
 	it('warn when set', () => {
