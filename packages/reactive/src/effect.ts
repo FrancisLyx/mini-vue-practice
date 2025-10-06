@@ -75,11 +75,7 @@ export function track(target, key) {
 	if (!deps) {
 		depsMap.set(key, (deps = new Set()))
 	}
-	if (deps.has(activeEffect)) return
-	// 让响应式属性知道，我具体依赖了哪些effect
-	deps.add(activeEffect)
-	// 让当前的副作用知道，我依赖了哪些响应式属性
-	activeEffect?.deps.push(deps)
+	trackEffect(deps)
 }
 
 // 执行targetMap => depsMap => deps 全部执行
@@ -87,21 +83,32 @@ export function trigger(target, key) {
 	const depsMap = targetMap.get(target)
 	if (!depsMap) return
 	const deps = depsMap.get(key)
-	if (deps) {
-		deps.forEach((dep) => {
-			if (dep.scheduler) {
-				dep.scheduler()
-			} else {
-				dep.run()
-			}
-		})
-	}
+	triggerEffect(deps)
 }
 
 export function stop(runner) {
 	runner.effect.stop()
 }
 
-function isTracking() {
+export function isTracking() {
 	return shouldTrack && activeEffect !== null
+}
+
+export function trackEffect(deps) {
+	if (deps.has(activeEffect)) return
+	// 让响应式属性知道，我具体依赖了哪些effect
+	deps.add(activeEffect)
+	// 让当前的副作用知道，我依赖了哪些响应式属性
+	activeEffect?.deps.push(deps)
+}
+
+export function triggerEffect(deps) {
+	if (!deps) return
+	deps.forEach((dep) => {
+		if (dep.scheduler) {
+			dep.scheduler()
+		} else {
+			dep.run()
+		}
+	})
 }
