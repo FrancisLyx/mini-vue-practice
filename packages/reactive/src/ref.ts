@@ -2,7 +2,7 @@
 
 import { trackEffect, triggerEffect, isTracking } from './effect'
 import { hasChanged, isObject } from '@mini-vue/shared'
-import { reactive } from './reactive'
+import { isRef, reactive, unRef } from './reactive'
 
 class RefImpl {
 	private _value: any
@@ -38,4 +38,21 @@ function trackRefValue(ref) {
 		trackEffect(ref.deps)
 	}
 	return ref._value
+}
+
+export function proxyRefs(target) {
+	return new Proxy(target, {
+		get(target, key, receiver) {
+			// 直接返回对应的value值
+			return unRef(Reflect.get(target, key, receiver))
+		},
+		set(target, key, value, receiver) {
+			const oldValue = target[key]
+			// 普通值类型，需要修改value属性,ref类型，直接修改值
+			if (isRef(oldValue) && !isRef(value)) {
+				return (target[key].value = value)
+			}
+			return Reflect.set(target, key, value, receiver)
+		}
+	})
 }
