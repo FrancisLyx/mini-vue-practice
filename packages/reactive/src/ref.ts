@@ -7,6 +7,7 @@ import { reactive } from './reactive'
 class RefImpl {
 	private _value: any
 	public deps: Set<any>
+	public __v_isRef = true
 	constructor(value) {
 		if (isObject(value)) {
 			value = reactive(value)

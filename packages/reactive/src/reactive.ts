@@ -19,6 +19,14 @@ export function isProxy(target) {
 	return isReactive(target) || isReadonly(target)
 }
 
+export function isRef(target) {
+	return !!target.__v_isRef
+}
+
+export function unRef(target) {
+	return isRef(target) ? target.value : target
+}
+
 export function readonly(target) {
 	return createReactiveObject(target, reactiveMap, true)
 }
