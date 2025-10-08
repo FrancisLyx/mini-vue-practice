@@ -1,4 +1,4 @@
-import { isReadonly, shallowReadonly, isProxy } from '@/reactive/reactive'
+import { isReadonly, shallowReadonly } from '../src/reactive'
 
 describe('shallowReadonly', () => {
 	it('happy path', () => {

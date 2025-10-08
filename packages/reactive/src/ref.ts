@@ -2,7 +2,7 @@
 
 import { trackEffect, triggerEffect, isTracking } from './effect'
 import { hasChanged, isObject } from '@mini-vue/shared'
-import { isRef, reactive, unRef } from './reactive'
+import { reactive } from './reactive'
 
 class RefImpl {
 	private _value: any
@@ -55,4 +55,12 @@ export function proxyRefs(target) {
 			return Reflect.set(target, key, value, receiver)
 		}
 	})
+}
+
+export function isRef(target) {
+	return !!target.__v_isRef
+}
+
+export function unRef(target) {
+	return isRef(target) ? target.value : target
 }

@@ -10,10 +10,6 @@ export default defineConfig({
 			{
 				find: /@mini-vue\/([\w-]*)/,
 				replacement: path.resolve(__dirname, 'packages') + '/$1/src'
-			},
-			{
-				find: /@\/reactive\/(.*)/,
-				replacement: path.resolve(__dirname, 'packages/reactive/src') + '/$1'
 			}
 		]
 	}

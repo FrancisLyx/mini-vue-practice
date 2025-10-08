@@ -2,8 +2,7 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@mini-vue/*": ["packages/*/src"],
-			"@/reactive/*": ["packages/reactive/src/*"]
+			"@mini-vue/*": ["packages/*/src"]
 		},
 		"alwaysStrict": false,
 		"allowSyntheticDefaultImports": true,
