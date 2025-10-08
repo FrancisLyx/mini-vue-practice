@@ -1,5 +1,5 @@
 {
-	"name": "react-admin",
+	"name": "mini-vue",
 	"version": "1.0.0",
 	"description": "",
 	"type": "module",
@@ -11,7 +11,8 @@
 		"lint:style": "stylelint \"{packages,apps}/**/*.{css,vue}\"",
 		"spellcheck": "cspell lint --dot --gitignore --color --cache --show-suggestions \"(packages|apps)/**/*.@(html|js|cjs|mjs|ts|tsx|css|scss|md|vue)\"",
 		"commit": "git-cz",
-		"prepare": "husky"
+		"prepare": "husky",
+		"build": "rollup -c rollup.config.js"
 	},
 	"config": {
 		"commitizen": {
