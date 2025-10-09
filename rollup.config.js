@@ -1,15 +1,16 @@
 import typescript from '@rollup/plugin-typescript'
+import pkg from './package.json'
 export default {
 	input: './packages/index.ts',
 	output: [
 		{
 			format: 'cjs',
-			file: './dist/index.cjs',
+			file: pkg.main,
 			sourcemap: true
 		},
 		{
 			format: 'es',
-			file: './dist/index.esm.js',
+			file: pkg.module,
 			sourcemap: true
 		}
 	],

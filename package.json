@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"description": "",
 	"type": "module",
-	"main": "index.js",
+	"main": "dist/index.cjs",
+	"module": "dist/index.esm.js",
 	"scripts": {
 		"dev": "pnpm dev:core",
 		"dev:core": "pnpm --filter core dev",
