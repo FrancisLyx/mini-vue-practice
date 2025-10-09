@@ -9,6 +9,7 @@
 		"noImplicitAny": false,
 		"declaration": true,
 		"declarationMap": true,
+		"declarationDir": "./dist/types",
 		"downlevelIteration": true,
 		"importHelpers": true,
 		"inlineSources": true,
@@ -28,5 +29,9 @@
 		"noUncheckedIndexedAccess": true,
 		"types": ["vitest/globals"]
 	},
-	"include": ["packages/*/src", "packages/*/__tests__"]
+	"include": [
+		"packages/**/*.ts",
+		"packages/**/*.tsx",
+		"packages/*/__tests__"
+	]
 }
