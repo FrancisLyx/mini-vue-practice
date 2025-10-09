@@ -14,7 +14,7 @@
 		"importHelpers": true,
 		"inlineSources": true,
 		"isolatedModules": true,
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"moduleResolution": "node",
 		"noErrorTruncation": true,
 		"noFallthroughCasesInSwitch": true,
@@ -29,9 +29,5 @@
 		"noUncheckedIndexedAccess": true,
 		"types": ["vitest/globals"]
 	},
-	"include": [
-		"packages/**/*.ts",
-		"packages/**/*.tsx",
-		"packages/*/__tests__"
-	]
+	"include": ["packages/**/*.ts", "packages/**/*.tsx", "packages/*/__tests__"]
 }

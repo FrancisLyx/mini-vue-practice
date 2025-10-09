@@ -1,3 +1,4 @@
+import { isObject } from '@mini-vue/shared'
 import { createComponentInstance, setupComponent } from './component'
 export function render(vnode, container) {
 	// patch
@@ -5,8 +6,44 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
+	// TODO 判断vnode是不是一个element
 	// 处理组件
-	processComponent(vnode, container)
+	// console.log(vnode.type, 'vnode.type==>')
+	if (typeof vnode.type === 'string') {
+		processElement(vnode, container)
+	} else if (isObject(vnode.type)) {
+		processComponent(vnode, container)
+	}
+}
+
+function processElement(vnode, container) {
+	// 处理element
+	mountElement(vnode, container)
+}
+
+function mountElement(vnode, container) {
+	const el = document.createElement(vnode.type)
+	const { children } = vnode
+	if (typeof children === 'string') {
+		el.textContent = children
+	} else if (Array.isArray(children)) {
+		mountChildren(children, el)
+	}
+
+	// props
+	const { props } = vnode
+	for (const key in props) {
+		const value = props[key]
+		// 添加属性
+		el.setAttribute(key, value)
+	}
+	container.append(el)
+}
+
+function mountChildren(children, container) {
+	children.forEach((v) => {
+		patch(v, container)
+	})
 }
 
 function processComponent(vnode, container) {
