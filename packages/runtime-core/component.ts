@@ -1,3 +1,4 @@
+import { ComponentPublicInstance } from './componentPublicInstance'
 /**
  * 创建组件实例
  * @param vnode
@@ -6,7 +7,8 @@
 export function createComponentInstance(vnode) {
 	const component = {
 		vnode,
-		type: vnode.type
+		type: vnode.type,
+		setupState: {}
 	}
 	return component
 }
@@ -29,6 +31,9 @@ export function setupComponent(instance) {
  */
 function setupStatefulComponent(instance) {
 	const Component = instance.type
+
+	// ctx对象代理
+	instance.proxy = new Proxy({ _: instance }, ComponentPublicInstance)
 	const { setup } = Component
 	if (setup) {
 		const setupResult = setup()
@@ -45,7 +50,6 @@ function handleSetupResult(instance, setupResult) {
 	if (typeof setupResult === 'object') {
 		instance.setupState = setupResult
 	}
-
 	finishComponentSetup(instance)
 }
 

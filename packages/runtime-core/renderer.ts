@@ -22,6 +22,7 @@ function processElement(vnode, container) {
 
 function mountElement(vnode, container) {
 	const el = document.createElement(vnode.type)
+	vnode.el = el
 	const { children } = vnode
 	if (typeof children === 'string') {
 		el.textContent = children
@@ -56,10 +57,12 @@ function mountComponent(vnode, container) {
 	// 初始化组件
 	setupComponent(instance)
 	// 挂载组件
-	setupRenderEffect(instance, container)
+	setupRenderEffect(instance, vnode, container)
 }
 
-function setupRenderEffect(instance, container) {
-	const subTree = instance.render()
+function setupRenderEffect(instance, vnode, container) {
+	const { proxy } = instance
+	const subTree = instance.render.call(proxy)
 	patch(subTree, container)
+	vnode.el = subTree.el
 }
