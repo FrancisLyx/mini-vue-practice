@@ -6,7 +6,6 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-	// TODO 判断vnode是不是一个element
 	// 处理组件
 	// console.log(vnode.type, 'vnode.type==>')
 	if (typeof vnode.type === 'string') {
