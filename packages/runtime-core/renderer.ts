@@ -8,9 +8,10 @@ export function render(vnode, container) {
 function patch(vnode, container) {
 	// 处理组件
 	// console.log(vnode.type, 'vnode.type==>')
-	if (typeof vnode.type === 'string') {
+	const { ShapeFlags } = vnode
+	if (ShapeFlags & ShapeFlags.ELEMENT) {
 		processElement(vnode, container)
-	} else if (isObject(vnode.type)) {
+	} else if (ShapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
 		processComponent(vnode, container)
 	}
 }
@@ -23,10 +24,10 @@ function processElement(vnode, container) {
 function mountElement(vnode, container) {
 	const el = document.createElement(vnode.type)
 	vnode.el = el
-	const { children } = vnode
-	if (typeof children === 'string') {
+	const { children, ShapeFlags } = vnode
+	if (ShapeFlags & ShapeFlags.TEXT_CHILDREN) {
 		el.textContent = children
-	} else if (Array.isArray(children)) {
+	} else if (ShapeFlags & ShapeFlags.ARRAY_CHILDREN) {
 		mountChildren(children, el)
 	}
 
