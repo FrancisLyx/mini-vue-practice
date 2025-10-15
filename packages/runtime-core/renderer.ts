@@ -1,5 +1,5 @@
-import { isObject } from '@mini-vue/shared'
 import { createComponentInstance, setupComponent } from './component'
+import { ShapeFlags } from '@mini-vue/shared'
 export function render(vnode, container) {
 	// patch
 	patch(vnode, container)
@@ -8,10 +8,11 @@ export function render(vnode, container) {
 function patch(vnode, container) {
 	// 处理组件
 	// console.log(vnode.type, 'vnode.type==>')
-	const { ShapeFlags } = vnode
-	if (ShapeFlags & ShapeFlags.ELEMENT) {
+	const { shapeFlags } = vnode
+	if (shapeFlags & ShapeFlags.ELEMENT) {
 		processElement(vnode, container)
-	} else if (ShapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+	} else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+		console.log(111)
 		processComponent(vnode, container)
 	}
 }
@@ -24,10 +25,10 @@ function processElement(vnode, container) {
 function mountElement(vnode, container) {
 	const el = document.createElement(vnode.type)
 	vnode.el = el
-	const { children, ShapeFlags } = vnode
-	if (ShapeFlags & ShapeFlags.TEXT_CHILDREN) {
+	const { children, shapeFlags } = vnode
+	if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
 		el.textContent = children
-	} else if (ShapeFlags & ShapeFlags.ARRAY_CHILDREN) {
+	} else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
 		mountChildren(children, el)
 	}
 
@@ -35,8 +36,14 @@ function mountElement(vnode, container) {
 	const { props } = vnode
 	for (const key in props) {
 		const value = props[key]
-		// 添加属性
-		el.setAttribute(key, value)
+		const isOn = (key: string) => /^on[A-Z]/.test(key)
+		if (isOn(key)) {
+			const event = key.slice(2).toLowerCase()
+			el.addEventListener(event, props[key])
+		} else {
+			// 添加属性
+			el.setAttribute(key, value)
+		}
 	}
 	container.append(el)
 }

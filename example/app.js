@@ -8,7 +8,13 @@ export const App = {
 			'div',
 			{
 				id: 'root',
-				class: ['red', 'bold']
+				class: ['red', 'bold'],
+				onClick: () => {
+					console.log('click')
+				},
+				onMouseover: () => {
+					console.log('mouseover')
+				}
 			},
 			// setupState 中取值
 			// this.$el  get root element

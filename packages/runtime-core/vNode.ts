@@ -5,13 +5,13 @@ export function createVNode(type: any, props?: any, children?: any) {
 		type,
 		props,
 		children,
-		ShapeFlags: getShapeFlags(type),
+		shapeFlags: getShapeFlags(type),
 		el: null
 	}
 	if (typeof children === 'string') {
-		vnode.ShapeFlags |= ShapeFlags.TEXT_CHILDREN
+		vnode.shapeFlags |= ShapeFlags.TEXT_CHILDREN
 	} else if (Array.isArray(children)) {
-		vnode.ShapeFlags |= ShapeFlags.ARRAY_CHILDREN
+		vnode.shapeFlags |= ShapeFlags.ARRAY_CHILDREN
 	}
 	return vnode
 }
