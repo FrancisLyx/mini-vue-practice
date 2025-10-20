@@ -1,4 +1,5 @@
 import { h } from '../dist/index.esm.js'
+import { foo } from './foo.js'
 
 window.self = null
 export const App = {
@@ -18,7 +19,7 @@ export const App = {
 			},
 			// setupState 中取值
 			// this.$el  get root element
-			[h('p', { class: 'red' }, 'hi,' + this.msg)]
+			[h('div', {}, 'hi,' + this.msg), h(foo, { count: 1 })]
 			// 'hi,mini-vue'
 		)
 	},

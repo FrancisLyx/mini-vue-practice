@@ -7,12 +7,10 @@ export function render(vnode, container) {
 
 function patch(vnode, container) {
 	// 处理组件
-	// console.log(vnode.type, 'vnode.type==>')
 	const { shapeFlags } = vnode
 	if (shapeFlags & ShapeFlags.ELEMENT) {
 		processElement(vnode, container)
 	} else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-		console.log(111)
 		processComponent(vnode, container)
 	}
 }
