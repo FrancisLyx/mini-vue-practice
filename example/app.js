@@ -9,17 +9,28 @@ export const App = {
 			'div',
 			{
 				id: 'root',
-				class: ['red', 'bold'],
-				onClick: () => {
-					console.log('click')
-				},
-				onMouseover: () => {
-					console.log('mouseover')
-				}
+				class: ['red', 'bold']
+				// onClick: () => {
+				// 	console.log('click')
+				// },
+				// onMouseover: () => {
+				// 	console.log('mouseover')
+				// }
 			},
 			// setupState 中取值
 			// this.$el  get root element
-			[h('div', {}, 'hi,' + this.msg), h(foo, { count: 1 })]
+			[
+				h('div', {}, 'hi,' + this.msg),
+				h(foo, {
+					count: 1,
+					onAdd: (a, b) => {
+						console.log('onAdd', a, b)
+					},
+					onAddFoo: (a, b) => {
+						console.log('onAddFoo', a, b)
+					}
+				})
+			]
 			// 'hi,mini-vue'
 		)
 	},
