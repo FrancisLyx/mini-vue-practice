@@ -1,4 +1,5 @@
 import { h } from '../dist/index.esm.js'
+import { renderSlots } from '../dist/index.esm.js'
 export const foo = {
 	setup(props, { emit }) {
 		// setup 中传入
@@ -15,9 +16,14 @@ export const foo = {
 		}
 	},
 	render() {
-		const btn = h('button', { onClick: this.emitAdd }, 'emitAdd')
+		// const btn = h('button', { onClick: this.emitAdd }, 'emitAdd')
 		//  在render中可以访问
-		const foo = h('div', {}, 'foo:' + this.count)
-		return h('div', {}, [foo, btn])
+		console.log(this.$slots)
+		const foo = h('p', {}, 'foo')
+		return h('div', {}, [
+			renderSlots(this.$slots, 'header', { age: 10 }),
+			foo,
+			renderSlots(this.$slots, 'footer')
+		])
 	}
 }

@@ -1,5 +1,6 @@
 import { ComponentPublicInstance } from './componentPublicInstance'
 import { initProps } from './componentProps'
+import { initSlots } from './componentSlots'
 import { shallowReadonly } from 'packages/reactive/src/reactive'
 import { emit } from './componentEmit'
 /**
@@ -13,6 +14,7 @@ export function createComponentInstance(vnode) {
 		type: vnode.type,
 		setupState: {},
 		props: {},
+		slots: {},
 		emit: () => {}
 	}
 	component.emit = emit.bind(null, component) as any
@@ -26,7 +28,7 @@ export function createComponentInstance(vnode) {
 export function setupComponent(instance) {
 	// 初始化组件
 	initProps(instance, instance.vnode.props)
-	// TODO: initSlots
+	initSlots(instance, instance.vnode.children)
 	// 执行组件的setup函数
 	setupStatefulComponent(instance)
 }
