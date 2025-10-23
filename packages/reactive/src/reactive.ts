@@ -1,4 +1,5 @@
 import { baseHandler, readonlyHandler, shallowReadonlyHandler } from './baseHandler'
+import { isObject } from '@mini-vue/shared'
 
 const reactiveMap = new WeakMap()
 
@@ -37,6 +38,10 @@ function createReactiveObject(
 	isReadonly = false,
 	shallow = false
 ) {
+	if (!isObject(target)) {
+		console.warn(`target ${target} is not an object`)
+		return
+	}
 	// 存在缓存
 	let exsistingReactiveObject = proxyMap.get(target)
 	if (exsistingReactiveObject) return exsistingReactiveObject

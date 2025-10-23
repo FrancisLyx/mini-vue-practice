@@ -1,4 +1,5 @@
 import { h } from '../dist/index.esm.js'
+import { Foo } from './Foo.js'
 
 window.self = null
 export const App = {
@@ -18,7 +19,15 @@ export const App = {
 			},
 			// setupState 中取值
 			// this.$el  get root element
-			[h('p', { class: 'red' }, 'hi,' + this.msg)]
+			[
+				h('p', { class: 'red' }, 'hi,' + this.msg),
+				h(Foo, {
+					count: 100,
+					onAdd: () => {
+						console.log('add event accept')
+					}
+				})
+			]
 			// 'hi,mini-vue'
 		)
 	},
