@@ -1,5 +1,6 @@
 import { h } from '../dist/index.esm.js'
 import { foo } from './foo.js'
+import { createTextVNode } from '../dist/index.esm.js'
 
 window.self = null
 export const App = {
@@ -36,7 +37,10 @@ export const App = {
 					foo,
 					{},
 					{
-						header: ({ age }) => h('p', {}, 'header + age:' + age),
+						header: ({ age }) => [
+							h('p', {}, 'header + age:' + age),
+							createTextVNode('text')
+						],
 						default: () => h('p', {}, 'default'),
 						footer: () => h('p', {}, 'footer')
 					}

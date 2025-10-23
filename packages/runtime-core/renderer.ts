@@ -1,5 +1,6 @@
 import { createComponentInstance, setupComponent } from './component'
 import { ShapeFlags } from '@mini-vue/shared'
+import { Fragment, Text } from './vNode'
 export function render(vnode, container) {
 	// patch
 	patch(vnode, container)
@@ -7,12 +8,34 @@ export function render(vnode, container) {
 
 function patch(vnode, container) {
 	// 处理组件
-	const { shapeFlags } = vnode
-	if (shapeFlags & ShapeFlags.ELEMENT) {
-		processElement(vnode, container)
-	} else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-		processComponent(vnode, container)
+	const { type, shapeFlags } = vnode
+
+	// Fragment -> 只渲染 children
+	switch (type) {
+		case Fragment:
+			processFragment(vnode, container)
+			break
+		case Text:
+			processText(vnode, container)
+			break
+		default:
+			if (shapeFlags & ShapeFlags.ELEMENT) {
+				processElement(vnode, container)
+			} else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+				processComponent(vnode, container)
+			}
+			break
 	}
+}
+
+function processFragment(vnode, container) {
+	mountChildren(vnode, container)
+}
+
+function processText(vnode, container) {
+	const el = document.createTextNode(vnode.children)
+	vnode.el = el
+	container.append(el)
 }
 
 function processElement(vnode, container) {
@@ -27,7 +50,7 @@ function mountElement(vnode, container) {
 	if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
 		el.textContent = children
 	} else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
-		mountChildren(children, el)
+		mountChildren(vnode, el)
 	}
 
 	// props
@@ -46,8 +69,8 @@ function mountElement(vnode, container) {
 	container.append(el)
 }
 
-function mountChildren(children, container) {
-	children.forEach((v) => {
+function mountChildren(vnode, container) {
+	vnode.children.forEach((v) => {
 		patch(v, container)
 	})
 }
