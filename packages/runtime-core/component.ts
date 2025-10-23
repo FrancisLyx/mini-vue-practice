@@ -44,9 +44,13 @@ function setupStatefulComponent(instance) {
 	instance.proxy = new Proxy({ _: instance }, ComponentPublicInstance)
 	const { setup } = Component
 	if (setup) {
+		// 在setup 作用域下拿到instance
+		setCurrentInstance(instance)
 		const setupResult = setup(shallowReadonly(instance.props), {
 			emit: instance.emit
 		})
+		// setup执行完成后，清空掉instance
+		setCurrentInstance(null)
 		handleSetupResult(instance, setupResult)
 	}
 }
@@ -72,4 +76,14 @@ function finishComponentSetup(instance) {
 	if (Component.render) {
 		instance.render = Component.render
 	}
+}
+
+let currentInstance = null
+
+export function getCurrentInstance() {
+	return currentInstance
+}
+
+export function setCurrentInstance(instance) {
+	currentInstance = instance
 }
