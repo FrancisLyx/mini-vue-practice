@@ -8,15 +8,19 @@ import { emit } from './componentEmit'
  * @param vnode
  * @returns 组件实例
  */
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
 	const component = {
 		vnode,
 		type: vnode.type,
 		setupState: {},
 		props: {},
 		slots: {},
-		emit: () => {}
+		emit: () => {},
+		// 如果parent存在，则使用parent的provides，否则使用空对象
+		provides: parent ? parent.provides : {},
+		parent
 	}
+
 	component.emit = emit.bind(null, component) as any
 	return component
 }

@@ -5,7 +5,7 @@ export function createApp(rootComponent) {
 		mount(rootContainer) {
 			//   转化成虚拟节点
 			const vnode = createVNode(rootComponent)
-			render(vnode, rootContainer)
+			render(vnode, rootContainer, null)
 		}
 	}
 }
