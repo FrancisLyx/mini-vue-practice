@@ -3,6 +3,7 @@ import { initProps } from './componentProps'
 import { initSlots } from './componentSlots'
 import { shallowReadonly } from 'packages/reactive/src/reactive'
 import { emit } from './componentEmit'
+import { proxyRefs } from 'packages/reactive/src/ref'
 /**
  * 创建组件实例
  * @param vnode
@@ -18,6 +19,8 @@ export function createComponentInstance(vnode, parent) {
 		emit: () => {},
 		// 如果parent存在，则使用parent的provides，否则使用空对象
 		provides: parent ? parent.provides : {},
+		isMounted: false,
+		subTree: {},
 		parent
 	}
 
@@ -66,7 +69,7 @@ function setupStatefulComponent(instance) {
  */
 function handleSetupResult(instance, setupResult) {
 	if (typeof setupResult === 'object') {
-		instance.setupState = setupResult
+		instance.setupState = proxyRefs(setupResult)
 	}
 	finishComponentSetup(instance)
 }

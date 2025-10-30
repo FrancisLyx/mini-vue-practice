@@ -2,49 +2,58 @@ import { createComponentInstance, setupComponent } from './component'
 import { ShapeFlags } from '@mini-vue/shared'
 import { Fragment, Text } from './vNode'
 import { createAppAPI } from './createApp'
-
+import { effect } from '@mini-vue/reactive'
 export function createRenderer(options) {
 	const { createElement, patchProp, insert } = options
 	function render(vnode, container, parentComponent) {
 		// patch
-		patch(vnode, container, parentComponent)
+		patch(null, vnode, container, parentComponent)
 	}
 
-	function patch(vnode, container, parentComponent) {
+	function patch(n1, n2, container, parentComponent) {
 		// 处理组件
-		const { type, shapeFlags } = vnode
+		const { type, shapeFlags } = n2
 
 		// Fragment -> 只渲染 children
 		switch (type) {
 			case Fragment:
-				processFragment(vnode, container, parentComponent)
+				processFragment(n1, n2, container, parentComponent)
 				break
 			case Text:
-				processText(vnode, container)
+				processText(n1, n2, container)
 				break
 			default:
 				if (shapeFlags & ShapeFlags.ELEMENT) {
-					processElement(vnode, container, parentComponent)
+					processElement(n1, n2, container, parentComponent)
 				} else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-					processComponent(vnode, container, parentComponent)
+					processComponent(n1, n2, container, parentComponent)
 				}
 				break
 		}
 	}
 
-	function processFragment(vnode, container, parentComponent) {
-		mountChildren(vnode, container, parentComponent)
+	function processFragment(n1, n2, container, parentComponent) {
+		mountChildren(n2, container, parentComponent)
 	}
 
-	function processText(vnode, container) {
-		const el = document.createTextNode(vnode.children)
-		vnode.el = el
-		container.append(el)
+	function processText(n1, n2, container) {
+		const { children } = n2
+		const textNode = (n2.el = document.createTextNode(children))
+		container.append(textNode)
 	}
 
-	function processElement(vnode, container, parentComponent) {
+	function processElement(n1, n2, container, parentComponent) {
 		// 处理element
-		mountElement(vnode, container, parentComponent)
+		if (!n1) {
+			mountElement(n2, container, parentComponent)
+		} else {
+			patchElement(n1, n2, container)
+		}
+	}
+
+	function patchElement(n1, n2, container) {
+		console.log('patchElement')
+		console.log(n1, n2)
 	}
 
 	function mountElement(vnode, container, parentComponent) {
@@ -68,13 +77,13 @@ export function createRenderer(options) {
 
 	function mountChildren(vnode, container, parentComponent) {
 		vnode.children.forEach((v) => {
-			patch(v, container, parentComponent)
+			patch(null, v, container, parentComponent)
 		})
 	}
 
-	function processComponent(vnode, container, parentComponent) {
+	function processComponent(n1, n2, container, parentComponent) {
 		// 处理组件
-		mountComponent(vnode, container, parentComponent)
+		mountComponent(n2, container, parentComponent)
 	}
 
 	function mountComponent(initialVNode, container, parentComponent) {
@@ -87,10 +96,27 @@ export function createRenderer(options) {
 	}
 
 	function setupRenderEffect(instance, initialVNode, container) {
-		const { proxy } = instance
-		const subTree = instance.render.call(proxy)
-		patch(subTree, container, instance)
-		initialVNode.el = subTree.el
+		effect(() => {
+			if (!instance.isMounted) {
+				// 初始化
+				console.log('init')
+				const { proxy } = instance
+				const subTree = (instance.subTree = instance.render.call(proxy))
+
+				patch(null, subTree, container, instance)
+
+				initialVNode.el = subTree.el
+				instance.isMounted = true
+			} else {
+				console.log('update')
+				const { proxy } = instance
+				const subTree = instance.render.call(proxy)
+				const prevSubTree = instance.subTree
+				instance.subTree = subTree
+
+				patch(prevSubTree, subTree, container, instance)
+			}
+		})
 	}
 	return {
 		createApp: createAppAPI(render)
