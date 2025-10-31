@@ -8,7 +8,9 @@ export function createRenderer(options) {
 	const {
 		createElement: hostCreateElement,
 		patchProp: hostPatchProp,
-		insert: hostInsert
+		insert: hostInsert,
+		remove: hostRemove,
+		setElementText: hostSetElementText
 	} = options
 	function render(vnode, container, parentComponent) {
 		// patch
@@ -52,16 +54,57 @@ export function createRenderer(options) {
 		if (!n1) {
 			mountElement(n2, container, parentComponent)
 		} else {
-			patchElement(n1, n2, container)
+			patchElement(n1, n2, container, parentComponent)
 		}
 	}
 
-	function patchElement(n1, n2, container) {
+	function patchElement(n1, n2, container, parentComponent) {
 		const oldProps = n1.props || EMPTY_OBJ
 		const newProps = n2.props || EMPTY_OBJ
 		const el = (n2.el = n1.el)
+		// 处理children的变化
+		patchChildren(n1, n2, el, parentComponent)
+		// 处理props的变化
 		patchProps(el, oldProps, newProps)
 	}
+
+	/**
+	 * 处理四种情况
+	 * 1. array -> text
+	 * @param n1
+	 * @param n2
+	 * @param el
+	 * @returns
+	 */
+	function patchChildren(n1, n2, el, parentComponent) {
+		const prevShapeFlags = n1.shapeFlags
+		const { shapeFlags } = n2
+		const c1 = n1.children
+		const c2 = n2.children
+
+		if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
+			if (prevShapeFlags & ShapeFlags.ARRAY_CHILDREN) {
+				unmountChildren(c1)
+			}
+			if (c1 !== c2) {
+				hostSetElementText(el, c2)
+			}
+		} else {
+			// 原来是一个text 现在是一个array，先把text节点删了
+			if (prevShapeFlags & ShapeFlags.TEXT_CHILDREN) {
+				hostSetElementText(el, '')
+				mountChildren(n2, el, parentComponent)
+			}
+		}
+	}
+
+	function unmountChildren(children) {
+		for (let i = 0; i < children.length; i++) {
+			const el = children[i].el
+			hostRemove(el)
+		}
+	}
+
 	function patchProps(el, oldProps, newProps) {
 		// props值被修改
 		for (const key in newProps) {
