@@ -4,6 +4,7 @@ import { Fragment, Text } from './vNode'
 import { createAppAPI } from './createApp'
 import { effect } from '@mini-vue/reactive'
 import { EMPTY_OBJ } from '@mini-vue/shared'
+import { shouldUpdateComponent } from './componentUpdateUtils'
 export function createRenderer(options) {
 	const {
 		createElement: hostCreateElement,
@@ -279,12 +280,31 @@ export function createRenderer(options) {
 
 	function processComponent(n1, n2, container, parentComponent, anchor) {
 		// 处理组件
-		mountComponent(n2, container, parentComponent, anchor)
+		if (!n1) {
+			mountComponent(n2, container, parentComponent, anchor)
+		} else {
+			updateComponent(n1, n2)
+		}
+	}
+
+	function updateComponent(n1, n2) {
+		const instance = (n2.component = n1.component)
+		if (shouldUpdateComponent(n1, n2)) {
+			// 是否需要更新节点
+			instance.next = n2
+			instance.update()
+		} else {
+			// n2.el = n1.el
+			// instance.vnode = n2
+		}
 	}
 
 	function mountComponent(initialVNode, container, parentComponent, anchor) {
 		// 创建组件实例
-		const instance = createComponentInstance(initialVNode, parentComponent)
+		const instance = (initialVNode.component = createComponentInstance(
+			initialVNode,
+			parentComponent
+		))
 		// 初始化组件
 		setupComponent(instance)
 		// 挂载组件
@@ -292,7 +312,7 @@ export function createRenderer(options) {
 	}
 
 	function setupRenderEffect(instance, initialVNode, container, anchor) {
-		effect(() => {
+		instance.update = effect(() => {
 			if (!instance.isMounted) {
 				// 初始化
 				console.log('init')
@@ -305,6 +325,11 @@ export function createRenderer(options) {
 				instance.isMounted = true
 			} else {
 				console.log('update')
+				const { next, vnode } = instance
+				if (next) {
+					next.el = vnode.el
+					updateComponentPreRender(instance, next)
+				}
 				const { proxy } = instance
 				const subTree = instance.render.call(proxy)
 				const prevSubTree = instance.subTree
@@ -315,25 +340,39 @@ export function createRenderer(options) {
 		})
 	}
 
+	function updateComponentPreRender(instance, next) {
+		instance.vnode = next
+		instance.next = null
+		instance.props = next.props
+	}
+
 	return {
 		createApp: createAppAPI(render)
 	}
 }
 
 function getSequence(arr) {
+	// 原数组
 	const p = arr.slice()
+	// 结果数组
 	const result = [0]
+	// 索引
 	let i, j, u, v, c
 	const len = arr.length
 	for (i = 0; i < len; i++) {
+		// 当前元素
 		const arrI = arr[i]
+		// 如果当前元素不为0，则进行比较，0在vue3中表示这个节点是全新的,因此不需要处理
 		if (arrI !== 0) {
+			// 最后一个元素
 			j = result[result.length - 1]
+			// 如果当前元素大于最后一个元素，则直接添加到结果数组中
 			if (arr[j] < arrI) {
 				p[i] = j
 				result.push(i)
 				continue
 			}
+			// 二分查找
 			u = 0
 			v = result.length - 1
 			while (u < v) {
@@ -344,6 +383,7 @@ function getSequence(arr) {
 					v = c
 				}
 			}
+			// 如果当前元素小于结果数组中的元素，则将当前元素插入到结果数组中
 			if (arrI < arr[result[u]!]) {
 				if (u > 0) {
 					p[i] = result[u - 1]
@@ -352,6 +392,7 @@ function getSequence(arr) {
 			}
 		}
 	}
+
 	u = result.length
 	v = result[u - 1]
 	while (u-- > 0) {
