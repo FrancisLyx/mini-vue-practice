@@ -5,6 +5,7 @@ import { createAppAPI } from './createApp'
 import { effect } from '@mini-vue/reactive'
 import { EMPTY_OBJ } from '@mini-vue/shared'
 import { shouldUpdateComponent } from './componentUpdateUtils'
+import { queueJobs } from './sceduler'
 export function createRenderer(options) {
 	const {
 		createElement: hostCreateElement,
@@ -294,8 +295,8 @@ export function createRenderer(options) {
 			instance.next = n2
 			instance.update()
 		} else {
-			// n2.el = n1.el
-			// instance.vnode = n2
+			n2.el = n1.el
+			instance.vnode = n2
 		}
 	}
 
@@ -312,32 +313,39 @@ export function createRenderer(options) {
 	}
 
 	function setupRenderEffect(instance, initialVNode, container, anchor) {
-		instance.update = effect(() => {
-			if (!instance.isMounted) {
-				// 初始化
-				console.log('init')
-				const { proxy } = instance
-				const subTree = (instance.subTree = instance.render.call(proxy))
+		instance.update = effect(
+			() => {
+				if (!instance.isMounted) {
+					// 初始化
+					console.log('init')
+					const { proxy } = instance
+					const subTree = (instance.subTree = instance.render.call(proxy))
 
-				patch(null, subTree, container, instance, null)
+					patch(null, subTree, container, instance, null)
 
-				initialVNode.el = subTree.el
-				instance.isMounted = true
-			} else {
-				console.log('update')
-				const { next, vnode } = instance
-				if (next) {
-					next.el = vnode.el
-					updateComponentPreRender(instance, next)
+					initialVNode.el = subTree.el
+					instance.isMounted = true
+				} else {
+					console.log('effect update')
+					const { next, vnode } = instance
+					if (next) {
+						next.el = vnode.el
+						updateComponentPreRender(instance, next)
+					}
+					const { proxy } = instance
+					const subTree = instance.render.call(proxy)
+					const prevSubTree = instance.subTree
+					instance.subTree = subTree
+
+					patch(prevSubTree, subTree, container, instance, null)
 				}
-				const { proxy } = instance
-				const subTree = instance.render.call(proxy)
-				const prevSubTree = instance.subTree
-				instance.subTree = subTree
-
-				patch(prevSubTree, subTree, container, instance, null)
+			},
+			{
+				scheduler() {
+					queueJobs(instance.update)
+				}
 			}
-		})
+		)
 	}
 
 	function updateComponentPreRender(instance, next) {
