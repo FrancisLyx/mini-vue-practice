@@ -20,14 +20,37 @@ function parseChildren(context) {
 	const nodes: any = []
 
 	let node
-	if (context.source.startsWith('{{')) {
+	const s = context.source
+	if (s.startsWith('{{')) {
 		node = parseInterpolation(context)
-		console.log(node, 'node==>')
+	} else if (s.startsWith('<')) {
+		if (/[a-z]/i.test(s[1])) {
+			node = parseElement(context)
+		}
 	}
 
 	nodes.push(node)
 
 	return nodes
+}
+
+function parseTag(context, tagType) {
+	const match: any = /^<\/?([a-z]*)/i.exec(context.source)
+	const tag = match[1]
+	advanceBy(context, match[0].length)
+	advanceBy(context, 1)
+	if (tagType === 'start') {
+		return {
+			type: NodeTypes.ELEMENT,
+			tag
+		}
+	}
+}
+
+function parseElement(context) {
+	const element = parseTag(context, 'start')
+	parseTag(context, 'end')
+	return element
 }
 
 function parseInterpolation(context) {
