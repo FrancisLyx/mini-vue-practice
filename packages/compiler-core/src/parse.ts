@@ -77,8 +77,6 @@ function parseElement(context, ancestors) {
 	element.children = parseChildren(context, ancestors)
 	ancestors.pop()
 
-	console.log(element.tag, 'element.tag')
-	console.log(context.source, 'context.source')
 	if (startsWithEndTagOpen(context.source, element.tag)) {
 		parseTag(context, TagType.END)
 	} else {
